@@ -186,7 +186,7 @@ int open_socket_C(const char *dev, unsigned char *destmac, unsigned char *srcmac
   int sockbufsize_rcv = 64*1024*1024;
   int set_res = setsockopt(sock, SOL_SOCKET, SO_RCVBUFFORCE, (int *)&sockbufsize_rcv, sizeof(int));
 #else // _APPLE_
-  int sockbufsize_rcv = 4*1024*1024;
+  int sockbufsize_rcv = 2*1024*1024;
   int set_res = setsockopt(sock, SOL_SOCKET, SO_RCVBUF, (int *)&sockbufsize_rcv, sizeof(int));
 #endif
   int get_res = getsockopt(sock, SOL_SOCKET, SO_RCVBUF, &realbufsize, &size);
@@ -202,7 +202,7 @@ int open_socket_C(const char *dev, unsigned char *destmac, unsigned char *srcmac
   int sockbufsize_snd = 64*1024*1024;
   set_res = setsockopt(sock, SOL_SOCKET, SO_SNDBUFFORCE, (int *)&sockbufsize_snd, sizeof(int));
 #else // _APPLE_
-  int sockbufsize_snd = 4*1024*1024;
+  int sockbufsize_snd = 2*1024*1024;
   set_res = setsockopt(sock, SOL_SOCKET, SO_SNDBUF, (int *)&sockbufsize_snd, sizeof(int));
 #endif
   get_res = getsockopt(sock, SOL_SOCKET, SO_SNDBUF, &realbufsize, &size);
@@ -387,6 +387,8 @@ int etherflow_(send_tensor_C)(real * data, int size) {
   unsigned char packet[ETH_FRAME_LEN];
   int i;
 
+  printf("<send_tensor> start\n");
+
   // send
   while(elements_pointer != size){
     // convert real -> Q8.8
@@ -425,6 +427,8 @@ int etherflow_(send_tensor_C)(real * data, int size) {
   // the next transfer.
   usleep(100);
 
+  printf("<send_tensor> end\n");
+
   return 0;
 }
 
@@ -446,6 +450,8 @@ int etherflow_(receive_tensor_C)(real *data, int size, int height) {
   int tensor_pointer = 0;
   int ii = 0;
 
+  printf("<recv_tensor> start\n");
+
   // if carryover pointer != 0 it means that there is left over (carryover)
   // data from the last call, add this carryover data to "data"
 //  if (0 < carryover_ptr) {
@@ -461,6 +467,8 @@ int etherflow_(receive_tensor_C)(real *data, int size, int height) {
     buffer = receive_frame_C(&currentlength);
     length += currentlength;
 
+    printf("<recv_tensor> lenght %d\n", length);
+
     // unpack Ethernet payload to tensor data array
     for (ii = 0; tensor_pointer < size && ii < currentlength; ii+=2){
       short* val_short = (short*)&buffer[ii];
@@ -470,6 +478,8 @@ int etherflow_(receive_tensor_C)(real *data, int size, int height) {
       tensor_pointer++;
     }
   }
+
+  printf("<recv_tensor> end lenght %d\n", length);
 
   // if not all data from the Ethernet packet has been read out, carry it over
   // to the next tensor

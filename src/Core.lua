@@ -1086,28 +1086,41 @@ function Core:configPort(args)
 
       -- execute given action
       if config.action == 'prefetch' then
+         print("prefetch" .. config.index)
+         print(config.data)
          self:openPortRdNoSync(config.index, config.data)
       elseif config.action == 'sync-prefetch' then
+         print("sync-prefetch" .. config.index)
          self:send_selectModule(blast_bus.area_streamer,
                                 blast_bus.addr_mem_streamer_0+config.index, 0)
          self:getStatus(blast_bus.status_primed)
       elseif config.action == 'read' then
+         print("read" .. config.index)
          self:syncPortRd(config.index)
       elseif config.action == 'activate' then
+         print("activate" .. config.index)
          self:send_selectModule(blast_bus.area_streamer,
                                 blast_bus.addr_mem_streamer_0+config.index, 0)
          self:send_activate()
       elseif config.action == 'fetch+read' then
+         print("fetch+read" .. config.index)
+         print(config.data)
          self:openPortRd(config.index, config.data)
       elseif config.action == 'fetch+read+sync+close' then
+         print("fetch_read_sync_close " .. config.index)
+         print(config.data)
          self:openPortRd(config.index, config.data)
          self:getStatus(blast_bus.status_done)
          self:closePort(config.index)
       elseif config.action == 'write' then
+         print("write " .. config.index)
+         print(config.data)
          self:openPortWr(config.index, config.data)
       elseif config.action == 'close' then
+         print("close " .. config.index)
          self:closePort(config.index)
       elseif config.action == 'sync+close' then
+         print("sync_close " .. config.index)
          self:closePortSafe(config.index)
       else
          error('<Core:configPort> unknown action')
